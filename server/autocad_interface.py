@@ -7,13 +7,14 @@ from typing import Optional, Dict, Any, List
 from server.models import AutoCADConnection, LispExecutionResult
 from server.utils import AutoCADConnectionError, timing_decorator
 
-# Try to import win32com, create mock if not available (for non-Windows systems)
+# Try to import win32com and pythoncom, create mock if not available (for non-Windows systems)
 try:
     import win32com.client
+    import pythoncom
     WIN32COM_AVAILABLE = True
 except ImportError:
     WIN32COM_AVAILABLE = False
-    # Create mock win32com for testing on non-Windows systems
+    # Create mock win32com and pythoncom for testing on non-Windows systems
     class MockWin32Com:
         @staticmethod
         def GetActiveObject(app_name):
@@ -23,8 +24,19 @@ except ImportError:
         def Dispatch(app_name):
             raise Exception("Cannot start AutoCAD - win32com not available on this system")
     
+    class MockPythoncom:
+        @staticmethod
+        def CoInitialize():
+            pass
+        
+        @staticmethod
+        def CoUninitialize():
+            pass
+    
     class win32com:
         client = MockWin32Com()
+    
+    pythoncom = MockPythoncom()
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +48,28 @@ class AutoCADInterface:
         self.timeout = timeout
         self.connections: Dict[str, AutoCADConnection] = {}
         self.logger = logging.getLogger(__name__)
+        self._com_initialized = False
+    
+    def _initialize_com(self):
+        """Initialize COM library if not already initialized"""
+        if not self._com_initialized and WIN32COM_AVAILABLE:
+            try:
+                pythoncom.CoInitialize()
+                self._com_initialized = True
+                self.logger.debug("COM library initialized successfully")
+            except Exception as e:
+                self.logger.warning(f"COM initialization failed: {str(e)}")
+                raise AutoCADConnectionError(f"Failed to initialize COM library: {str(e)}")
+    
+    def _uninitialize_com(self):
+        """Uninitialize COM library if it was initialized by this instance"""
+        if self._com_initialized and WIN32COM_AVAILABLE:
+            try:
+                pythoncom.CoUninitialize()
+                self._com_initialized = False
+                self.logger.debug("COM library uninitialized")
+            except Exception as e:
+                self.logger.warning(f"COM cleanup failed: {str(e)}")
     
     @timing_decorator
     def connect_to_autocad(self, instance_id: str = "default") -> AutoCADConnection:
@@ -53,6 +87,9 @@ class AutoCADInterface:
         """
         try:
             self.logger.info(f"Attempting to connect to AutoCAD (instance: {instance_id})")
+            
+            # Initialize COM library before making COM calls
+            self._initialize_com()
             
             # Try to get existing AutoCAD application
             try:
@@ -274,6 +311,11 @@ class AutoCADInterface:
                 connection.connected = False
                 del self.connections[instance_id]
                 self.logger.info(f"Disconnected from AutoCAD instance: {instance_id}")
+                
+                # Uninitialize COM if this was the last connection
+                if not self.connections:
+                    self._uninitialize_com()
+                
                 return True
             return False
         except Exception as e:
@@ -286,6 +328,11 @@ class AutoCADInterface:
         for instance_id in list(self.connections.keys()):
             if self.disconnect(instance_id):
                 count += 1
+        
+        # Ensure COM is uninitialized after disconnecting all
+        if count > 0:
+            self._uninitialize_com()
+        
         return count
     
     def list_connections(self) -> List[Dict[str, Any]]:
