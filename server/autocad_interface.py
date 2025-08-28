@@ -52,14 +52,19 @@ class AutoCADInterface:
     
     def _initialize_com(self):
         """Initialize COM library if not already initialized"""
-        if not self._com_initialized and WIN32COM_AVAILABLE:
+        if WIN32COM_AVAILABLE:
             try:
+                # COM initialization is per-thread, so we always try to initialize
+                # pythoncom.CoInitialize() will succeed or return S_FALSE if already initialized
                 pythoncom.CoInitialize()
                 self._com_initialized = True
                 self.logger.debug("COM library initialized successfully")
             except Exception as e:
                 self.logger.warning(f"COM initialization failed: {str(e)}")
                 raise AutoCADConnectionError(f"Failed to initialize COM library: {str(e)}")
+        else:
+            # For non-Windows systems, just mark as initialized
+            self._com_initialized = True
     
     def _uninitialize_com(self):
         """Uninitialize COM library if it was initialized by this instance"""
@@ -70,6 +75,9 @@ class AutoCADInterface:
                 self.logger.debug("COM library uninitialized")
             except Exception as e:
                 self.logger.warning(f"COM cleanup failed: {str(e)}")
+        elif self._com_initialized:
+            # For non-Windows systems, just mark as uninitialized
+            self._com_initialized = False
     
     @timing_decorator
     def connect_to_autocad(self, instance_id: str = "default") -> AutoCADConnection:
@@ -160,10 +168,17 @@ class AutoCADInterface:
         start_time = time.time()
         
         try:
+            # Initialize COM library before any COM operations
+            self._initialize_com()
+            
             connection = self.get_connection(instance_id)
             if not connection:
                 # Try to establish connection
                 connection = self.connect_to_autocad(instance_id)
+            
+            # Validate connection before proceeding
+            if not connection or not self.is_connection_alive(connection):
+                raise AutoCADConnectionError("Failed to establish or validate AutoCAD connection")
             
             self.logger.debug(f"Executing LISP code: {lisp_code[:100]}...")
             
@@ -237,9 +252,17 @@ class AutoCADInterface:
             LispExecutionResult with execution details
         """
         try:
+            # Initialize COM library before any COM operations
+            self._initialize_com()
+            
             connection = self.get_connection(instance_id)
             if not connection:
-                raise AutoCADConnectionError("No active AutoCAD connection")
+                # Try to establish connection if none exists
+                connection = self.connect_to_autocad(instance_id)
+            
+            # Validate connection before proceeding
+            if not connection or not self.is_connection_alive(connection):
+                raise AutoCADConnectionError("Failed to establish or validate AutoCAD connection")
             
             self.logger.info(f"Saving drawing to: {filepath}")
             
