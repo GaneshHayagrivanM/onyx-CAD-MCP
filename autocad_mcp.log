@@ -1,0 +1,32 @@
+2025-08-28 08:06:55,524 - server.utils - INFO - Starting AutoCAD MCP Server...
+2025-08-28 08:06:55,524 - server.utils - INFO - Configuration: type
+2025-08-28 08:06:55,538 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-28 08:06:55,538 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-28 08:06:55,539 - werkzeug - INFO -  * Restarting with stat
+2025-08-28 08:06:55,701 - server.utils - INFO - Starting AutoCAD MCP Server...
+2025-08-28 08:06:55,701 - server.utils - INFO - Configuration: type
+2025-08-28 08:06:55,710 - werkzeug - WARNING -  * Debugger is active!
+2025-08-28 08:06:55,712 - werkzeug - INFO -  * Debugger PIN: 622-692-108
+2025-08-28 08:07:09,751 - server.utils - INFO - Starting AutoCAD MCP Server...
+2025-08-28 08:07:09,751 - server.utils - INFO - Configuration: type
+2025-08-28 08:07:09,763 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-28 08:07:09,763 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-28 08:07:09,763 - werkzeug - INFO -  * Restarting with stat
+2025-08-28 08:07:09,903 - server.utils - INFO - Starting AutoCAD MCP Server...
+2025-08-28 08:07:09,903 - server.utils - INFO - Configuration: type
+2025-08-28 08:07:09,915 - werkzeug - WARNING -  * Debugger is active!
+2025-08-28 08:07:09,920 - werkzeug - INFO -  * Debugger PIN: 622-692-108
+2025-08-28 08:07:12,615 - werkzeug - INFO - 127.0.0.1 - - [28/Aug/2025 08:07:12] "GET / HTTP/1.1" 200 -
+2025-08-28 08:07:31,076 - server.utils - INFO - Starting AutoCAD MCP Server...
+2025-08-28 08:07:31,076 - server.utils - INFO - Configuration: type
+2025-08-28 08:07:31,088 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-28 08:07:31,088 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-28 08:07:31,089 - werkzeug - INFO -  * Restarting with stat
+2025-08-28 08:07:31,251 - server.utils - INFO - Starting AutoCAD MCP Server...
+2025-08-28 08:07:31,251 - server.utils - INFO - Configuration: type
+2025-08-28 08:07:31,263 - werkzeug - WARNING -  * Debugger is active!
+2025-08-28 08:07:31,265 - werkzeug - INFO -  * Debugger PIN: 622-692-108
+2025-08-28 08:07:34,933 - werkzeug - INFO - 127.0.0.1 - - [28/Aug/2025 08:07:34] "POST /api/utils/calculate_area HTTP/1.1" 200 -
