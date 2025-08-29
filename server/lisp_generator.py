@@ -17,20 +17,11 @@ class LispGenerator:
     def create_wall(self, start_point: Point, end_point: Point, thickness: float, height: float) -> str:
         """Generate AutoLISP code to create a wall"""
         return f"""
-(defun create-wall (start-pt end-pt thickness height)
-  (setq start-pt {format_lisp_point(start_point)})
-  (setq end-pt {format_lisp_point(end_point)})
-  (setq thickness {thickness})
-  (setq height {height})
-  
-  ; Create wall as 3D solid
-  (command "._3DFACE" start-pt end-pt 
-           (list (+ (car end-pt) thickness) (+ (cadr end-pt) thickness) height)
-           (list (+ (car start-pt) thickness) (+ (cadr start-pt) thickness) height)
-           "")
-  (princ "Wall created successfully")
-)
-(create-wall {format_lisp_point(start_point)} {format_lisp_point(end_point)} {thickness} {height})
+; Load architectural tools for proper wall creation
+(load "architectural_tools.lsp")
+
+; Use the proper architectural wall creation function
+(create-architectural-wall {format_lisp_point(start_point)} {format_lisp_point(end_point)} {thickness} {height})
 """
 
     def insert_door(self, wall_reference: str, position: Point, width: float, height: float, swing_direction: SwingDirection) -> str:
