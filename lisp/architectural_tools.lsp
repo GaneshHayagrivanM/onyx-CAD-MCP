@@ -14,23 +14,21 @@
 (setq *default-window-sill* 30.0)
 
 ;; Function to create architectural wall
-(defun create-architectural-wall (start-pt end-pt thickness height / wall-vector wall-angle offset-pt1 offset-pt2)
+(defun create-architectural-wall (start-pt end-pt thickness height / wall-angle perp-angle p1 p2 p3 p4)
   "Create an architectural wall with proper thickness"
-  (setq wall-vector (mapcar '- end-pt start-pt))
   (setq wall-angle (angle start-pt end-pt))
-  (setq offset-angle (+ wall-angle (/ pi 2)))
+  (setq perp-angle (+ wall-angle (/ pi 2))) ; Perpendicular angle
   
   ;; Calculate offset points for wall thickness
-  (setq offset-pt1 (polar start-pt offset-angle (/ thickness 2)))
-  (setq offset-pt2 (polar end-pt offset-angle (/ thickness 2)))
-  (setq offset-pt3 (polar end-pt offset-angle (- 0 (/ thickness 2))))
-  (setq offset-pt4 (polar start-pt offset-angle (- 0 (/ thickness 2))))
+  (setq p1 (polar start-pt perp-angle (/ thickness 2)))
+  (setq p2 (polar end-pt perp-angle (/ thickness 2)))
+  (setq p3 (polar end-pt (- perp-angle pi) (/ thickness 2)))
+  (setq p4 (polar start-pt (- perp-angle pi) (/ thickness 2)))
   
   ;; Create wall as closed polyline
   (ensure-layer "WALLS" 1 "Continuous" 0.35)
   (set-current-layer "WALLS")
-  
-  (command "._PLINE" offset-pt1 offset-pt2 offset-pt3 offset-pt4 "C")
+  (draw-polyline (list p1 p2 p3 p4) T)
   
   ;; Add centerline
   (ensure-layer "WALL-CENTER" 8 "CENTER" 0.15)
@@ -41,80 +39,73 @@
 )
 
 ;; Function to create door opening with swing
-(defun create-door-opening (wall-start wall-end position width height swing-dir / door-angle door-start door-end)
+(defun create-door-opening (wall-start wall-end position width height swing-dir
+                            / door-angle door-start door-end
+                              hinge-pt open-door-pt start-angle end-angle)
   "Create door opening with swing indication"
   (setq door-angle (angle wall-start wall-end))
   (setq door-start position)
   (setq door-end (polar position door-angle width))
   
-  ;; Create door opening
   (ensure-layer "DOORS" 3 "Continuous" 0.25)
   (set-current-layer "DOORS")
   
-  ;; Draw door opening lines
-  (draw-line door-start door-end)
-  
-  ;; Draw door swing arc
+  ;; Determine hinge point and swing angles
   (cond
     ((= swing-dir "LEFT_IN")
-     (draw-arc door-start 0 (/ pi 2) width))
-    ((= swing-dir "LEFT_OUT") 
-     (draw-arc door-start pi (+ pi (/ pi 2)) width))
+     (setq hinge-pt door-start)
+     (setq start-angle door-angle)
+     (setq end-angle (+ door-angle (/ pi 2))))
+    ((= swing-dir "LEFT_OUT")
+     (setq hinge-pt door-start)
+     (setq start-angle (- door-angle (/ pi 2)))
+     (setq end-angle door-angle))
     ((= swing-dir "RIGHT_IN")
-     (draw-arc door-end (/ pi 2) pi width))
+     (setq hinge-pt door-end)
+     (setq start-angle (+ door-angle (/ pi 2)))
+     (setq end-angle (+ door-angle pi)))
     ((= swing-dir "RIGHT_OUT")
-     (draw-arc door-end (+ pi (/ pi 2)) (* 2 pi) width))
+     (setq hinge-pt door-end)
+     (setq start-angle (+ door-angle pi))
+     (setq end-angle (+ door-angle (* 1.5 pi))))
   )
   
-  ;; Add door symbol (rectangle representing door)
-  (setq door-thickness 2)
-  (setq perp-angle (+ door-angle (/ pi 2)))
-  (setq door-corner1 (polar door-start perp-angle door-thickness))
-  (setq door-corner2 (polar door-end perp-angle door-thickness))
+  ;; Draw door swing arc
+  (draw-arc hinge-pt start-angle end-angle width)
   
-  (draw-line door-start door-corner1)
-  (draw-line door-corner1 door-corner2)
-  (draw-line door-corner2 door-end)
+  ;; Draw door panel (line from hinge to end of arc)
+  (setq open-door-pt (polar hinge-pt end-angle width))
+  (draw-line hinge-pt open-door-pt)
   
   (display-message "Door opening created")
 )
 
 ;; Function to create window opening
-(defun create-window-opening (wall-start wall-end position width height sill-height / win-angle win-start win-end win-sill-start win-sill-end win-head-start win-head-end)
-  "Create window opening with sill and header"
+(defun create-window-opening (wall-start wall-end position width height sill-height
+                              / win-angle win-start win-end perp-angle
+                                p1 p2 p3 p4 mid1 mid2)
+  "Create window opening in 2D plan view"
   (setq win-angle (angle wall-start wall-end))
   (setq win-start position)
   (setq win-end (polar position win-angle width))
   
-  ;; Calculate sill and header positions
-  (setq perp-angle (+ win-angle (/ pi 2)))
-  (setq win-sill-start (polar win-start perp-angle sill-height))
-  (setq win-sill-end (polar win-end perp-angle sill-height))
-  (setq win-head-start (polar win-sill-start perp-angle height))
-  (setq win-head-end (polar win-sill-end perp-angle height))
-  
-  ;; Create window layer and draw
   (ensure-layer "WINDOWS" 4 "Continuous" 0.25)
   (set-current-layer "WINDOWS")
   
-  ;; Draw window opening rectangle
-  (draw-rectangle win-sill-start win-head-end)
+  ;; Calculate window frame corners based on wall thickness
+  (setq perp-angle (+ win-angle (/ pi 2)))
+  (setq p1 (polar win-start perp-angle (/ *default-wall-thickness* 2)))
+  (setq p2 (polar win-end perp-angle (/ *default-wall-thickness* 2)))
+  (setq p3 (polar win-end perp-angle (- 0 (/ *default-wall-thickness* 2))))
+  (setq p4 (polar win-start perp-angle (- 0 (/ *default-wall-thickness* 2))))
   
-  ;; Draw window mullions (cross pattern)
-  (draw-line (list (/ (+ (car win-sill-start) (car win-sill-end)) 2) 
-                   (cadr win-sill-start))
-             (list (/ (+ (car win-head-start) (car win-head-end)) 2) 
-                   (cadr win-head-start)))
+  ;; Draw window frame
+  (draw-polyline (list p1 p2 p3 p4) T)
   
-  (draw-line (list (car win-sill-start) 
-                   (/ (+ (cadr win-sill-start) (cadr win-head-start)) 2))
-             (list (car win-sill-end) 
-                   (/ (+ (cadr win-sill-end) (cadr win-head-end)) 2)))
-  
-  ;; Add sill line
-  (ensure-layer "WINDOW-SILL" 6 "Continuous" 0.15)
-  (set-current-layer "WINDOW-SILL")
-  (draw-line win-sill-start win-sill-end)
+  ;; Draw centerline for glass
+  (setq mid1 (list (/ (+ (car p1) (car p4)) 2) (/ (+ (cadr p1) (cadr p4)) 2)))
+  (setq mid2 (list (/ (+ (car p2) (car p3)) 2) (/ (+ (cadr p2) (cadr p3)) 2)))
+  (draw-line mid1 mid2)
   
   (display-message "Window opening created")
 )

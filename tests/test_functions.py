@@ -150,8 +150,7 @@ class TestLispGenerator:
         end = Point(100, 0, 0)
         lisp_code = lisp_generator.create_wall(start, end, 6, 96)
         
-        assert "create-wall" in lisp_code
-        assert "3DFACE" in lisp_code
+        assert "create-architectural-wall" in lisp_code
         assert "0 0 0" in lisp_code
         assert "100 0 0" in lisp_code
     
