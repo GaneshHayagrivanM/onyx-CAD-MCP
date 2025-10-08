@@ -122,8 +122,15 @@ class AutoCADInterface:
             else:
                 self.logger.debug(f"LISP path already in AutoCAD support paths: {lisp_path}")
 
-            # Get active document and model space
-            doc = app.ActiveDocument
+            # Get active document and model space, create new if none exists
+            try:
+                doc = app.ActiveDocument
+                self.logger.info(f"Using active document: {doc.Name}")
+            except Exception:
+                self.logger.info("No active document, creating new drawing.")
+                doc = app.Documents.Add()
+                time.sleep(1) # Allow time for new document to become active
+
             model_space = doc.ModelSpace
             
             # Create connection object
