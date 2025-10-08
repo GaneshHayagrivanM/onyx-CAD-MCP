@@ -3,6 +3,7 @@ AutoCAD COM interface for connecting and executing commands
 """
 import logging
 import time
+import os
 from typing import Optional, Dict, Any, List
 from server.models import AutoCADConnection, LispExecutionResult
 from server.utils import AutoCADConnectionError, timing_decorator
@@ -110,6 +111,17 @@ class AutoCADInterface:
                 app.Visible = True
                 time.sleep(2)  # Allow time for startup
             
+            # Add project's LISP folder to AutoCAD's support path
+            lisp_path = os.path.abspath("lisp")
+            preferences = app.Preferences
+            support_path = preferences.Files.SupportPath
+
+            if lisp_path not in support_path:
+                self.logger.info(f"Adding LISP path to AutoCAD support paths: {lisp_path}")
+                preferences.Files.SupportPath = f"{support_path};{lisp_path}"
+            else:
+                self.logger.debug(f"LISP path already in AutoCAD support paths: {lisp_path}")
+
             # Get active document and model space
             doc = app.ActiveDocument
             model_space = doc.ModelSpace
@@ -183,7 +195,7 @@ class AutoCADInterface:
             self.logger.debug(f"Executing LISP code: {lisp_code[:100]}...")
             
             # Execute the AutoLISP code
-            result = connection.document.SendCommand(lisp_code + "\n")
+            result = connection.document.SendStringToExecute(lisp_code + "\n", True)
             
             execution_time = time.time() - start_time
             
