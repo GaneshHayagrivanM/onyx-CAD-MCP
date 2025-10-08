@@ -17,7 +17,8 @@ class LispGenerator:
     def create_wall(self, start_point: Point, end_point: Point, thickness: float, height: float) -> str:
         """Generate AutoLISP code to create a wall"""
         return f"""
-; Load architectural tools for proper wall creation
+; Load core functions and architectural tools
+(load "core_functions.lsp")
 (load "architectural_tools.lsp")
 
 ; Use the proper architectural wall creation function
