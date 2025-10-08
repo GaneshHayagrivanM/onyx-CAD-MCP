@@ -109,7 +109,7 @@ class AutoCADInterface:
                 self.logger.info("Starting new AutoCAD instance")
                 app = win32com.client.Dispatch(self.application_name)
                 app.Visible = True
-                time.sleep(2)  # Allow time for startup
+                time.sleep(5)  # Allow more time for startup
             
             # Add project's LISP folder to AutoCAD's support path
             lisp_path = os.path.abspath("lisp")
@@ -129,7 +129,7 @@ class AutoCADInterface:
             except Exception:
                 self.logger.info("No active document, creating new drawing.")
                 doc = app.Documents.Add()
-                time.sleep(1) # Allow time for new document to become active
+                time.sleep(2) # Allow more time for new document to become active
 
             model_space = doc.ModelSpace
             
