@@ -113,8 +113,6 @@ class AutoCADConnection:
     """Represents AutoCAD connection information"""
     instance_id: str
     application: Any = None
-    document: Any = None
-    model_space: Any = None
     connected: bool = False
     
 @dataclass

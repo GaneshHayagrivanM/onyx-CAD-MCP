@@ -55,8 +55,6 @@ class AutoCADInterface:
         """Initialize COM library if not already initialized"""
         if WIN32COM_AVAILABLE:
             try:
-                # COM initialization is per-thread, so we always try to initialize
-                # pythoncom.CoInitialize() will succeed or return S_FALSE if already initialized
                 pythoncom.CoInitialize()
                 self._com_initialized = True
                 self.logger.debug("COM library initialized successfully")
@@ -64,7 +62,6 @@ class AutoCADInterface:
                 self.logger.warning(f"COM initialization failed: {str(e)}")
                 raise AutoCADConnectionError(f"Failed to initialize COM library: {str(e)}")
         else:
-            # For non-Windows systems, just mark as initialized
             self._com_initialized = True
     
     def _uninitialize_com(self):
@@ -77,41 +74,38 @@ class AutoCADInterface:
             except Exception as e:
                 self.logger.warning(f"COM cleanup failed: {str(e)}")
         elif self._com_initialized:
-            # For non-Windows systems, just mark as uninitialized
             self._com_initialized = False
-    
+
+    def _get_active_document(self, app: Any) -> Any:
+        """Get the active document, creating one if none exists."""
+        try:
+            doc = app.ActiveDocument
+            self.logger.debug(f"Using active document: {doc.Name}")
+        except Exception:
+            self.logger.info("No active document, creating new drawing.")
+            doc = app.Documents.Add()
+            time.sleep(2)
+        return doc
+
     @timing_decorator
     def connect_to_autocad(self, instance_id: str = "default") -> AutoCADConnection:
         """
         Connect to AutoCAD application
-        
-        Args:
-            instance_id: Unique identifier for this connection
-            
-        Returns:
-            AutoCADConnection object with connection details
-            
-        Raises:
-            AutoCADConnectionError: If connection fails
         """
         try:
             self.logger.info(f"Attempting to connect to AutoCAD (instance: {instance_id})")
             
-            # Initialize COM library before making COM calls
             self._initialize_com()
             
-            # Try to get existing AutoCAD application
             try:
                 app = win32com.client.GetActiveObject(self.application_name)
                 self.logger.info("Connected to existing AutoCAD instance")
             except:
-                # Start new AutoCAD instance
                 self.logger.info("Starting new AutoCAD instance")
                 app = win32com.client.Dispatch(self.application_name)
                 app.Visible = True
-                time.sleep(2)  # Allow time for startup
+                time.sleep(2)
             
-            # Add project's LISP folder to AutoCAD's support path
             lisp_path = os.path.abspath("lisp")
             preferences = app.Preferences
             support_path = preferences.Files.SupportPath
@@ -122,23 +116,11 @@ class AutoCADInterface:
             else:
                 self.logger.debug(f"LISP path already in AutoCAD support paths: {lisp_path}")
 
-            # Get active document and model space, create new if none exists
-            try:
-                doc = app.ActiveDocument
-                self.logger.info(f"Using active document: {doc.Name}")
-            except Exception:
-                self.logger.info("No active document, creating new drawing.")
-                doc = app.Documents.Add()
-                time.sleep(1) # Allow time for new document to become active
-
-            model_space = doc.ModelSpace
+            self._get_active_document(app)
             
-            # Create connection object
             connection = AutoCADConnection(
                 instance_id=instance_id,
                 application=app,
-                document=doc,
-                model_space=model_space,
                 connected=True
             )
             
@@ -166,7 +148,6 @@ class AutoCADInterface:
         try:
             if connection.application is None:
                 return False
-            # Try to access a property to test if connection is alive
             _ = connection.application.Name
             return True
         except:
@@ -176,33 +157,24 @@ class AutoCADInterface:
     def execute_lisp(self, lisp_code: str, instance_id: str = "default") -> LispExecutionResult:
         """
         Execute AutoLISP code in AutoCAD
-        
-        Args:
-            lisp_code: AutoLISP code to execute
-            instance_id: AutoCAD instance to use
-            
-        Returns:
-            LispExecutionResult with execution details
         """
         start_time = time.time()
         
         try:
-            # Initialize COM library before any COM operations
             self._initialize_com()
             
             connection = self.get_connection(instance_id)
             if not connection:
-                # Try to establish connection
                 connection = self.connect_to_autocad(instance_id)
             
-            # Validate connection before proceeding
             if not connection or not self.is_connection_alive(connection):
                 raise AutoCADConnectionError("Failed to establish or validate AutoCAD connection")
             
             self.logger.debug(f"Executing LISP code: {lisp_code[:100]}...")
             
-            # Execute the AutoLISP code
-            result = connection.document.SendStringToExecute(lisp_code + "\n", True)
+            doc = self._get_active_document(connection.application)
+
+            result = doc.SendStringToExecute(lisp_code + "\n", True)
             
             execution_time = time.time() - start_time
             
@@ -228,16 +200,8 @@ class AutoCADInterface:
     def load_lisp_file(self, filepath: str, instance_id: str = "default") -> LispExecutionResult:
         """
         Load AutoLISP file in AutoCAD
-        
-        Args:
-            filepath: Path to the LISP file
-            instance_id: AutoCAD instance to use
-            
-        Returns:
-            LispExecutionResult with execution details
         """
         try:
-            # Read the LISP file
             with open(filepath, 'r') as f:
                 lisp_code = f.read()
             
@@ -247,59 +211,37 @@ class AutoCADInterface:
         except FileNotFoundError:
             error_msg = f"LISP file not found: {filepath}"
             self.logger.error(error_msg)
-            return LispExecutionResult(
-                success=False,
-                error_message=error_msg
-            )
+            return LispExecutionResult(success=False, error_message=error_msg)
         except Exception as e:
             error_msg = f"Failed to load LISP file: {str(e)}"
             self.logger.error(error_msg)
-            return LispExecutionResult(
-                success=False,
-                error_message=error_msg
-            )
+            return LispExecutionResult(success=False, error_message=error_msg)
     
     def save_current_drawing(self, filepath: str, instance_id: str = "default") -> LispExecutionResult:
         """
         Save current AutoCAD drawing
-        
-        Args:
-            filepath: Path where to save the drawing
-            instance_id: AutoCAD instance to use
-            
-        Returns:
-            LispExecutionResult with execution details
         """
         try:
-            # Initialize COM library before any COM operations
             self._initialize_com()
             
             connection = self.get_connection(instance_id)
             if not connection:
-                # Try to establish connection if none exists
                 connection = self.connect_to_autocad(instance_id)
             
-            # Validate connection before proceeding
             if not connection or not self.is_connection_alive(connection):
                 raise AutoCADConnectionError("Failed to establish or validate AutoCAD connection")
             
             self.logger.info(f"Saving drawing to: {filepath}")
             
-            # Save the drawing
-            connection.document.SaveAs(filepath)
+            doc = self._get_active_document(connection.application)
+            doc.SaveAs(filepath)
             
-            return LispExecutionResult(
-                success=True,
-                result=f"Drawing saved to {filepath}"
-            )
+            return LispExecutionResult(success=True, result=f"Drawing saved to {filepath}")
             
         except Exception as e:
             error_msg = f"Failed to save drawing: {str(e)}"
             self.logger.error(error_msg)
-            return LispExecutionResult(
-                success=False,
-                error_message=error_msg
-            )
+            return LispExecutionResult(success=False, error_message=error_msg)
     
     def get_active_document_info(self, instance_id: str = "default") -> Dict[str, Any]:
         """Get information about the active AutoCAD document"""
@@ -308,7 +250,7 @@ class AutoCADInterface:
             if not connection:
                 return {"error": "No active AutoCAD connection"}
             
-            doc = connection.document
+            doc = self._get_active_document(connection.application)
             
             return {
                 "name": doc.Name,
@@ -340,21 +282,12 @@ class AutoCADInterface:
     def disconnect(self, instance_id: str = "default") -> bool:
         """
         Disconnect from AutoCAD instance
-        
-        Args:
-            instance_id: Instance to disconnect from
-            
-        Returns:
-            True if disconnected successfully
         """
         try:
             if instance_id in self.connections:
-                connection = self.connections[instance_id]
-                connection.connected = False
                 del self.connections[instance_id]
                 self.logger.info(f"Disconnected from AutoCAD instance: {instance_id}")
                 
-                # Uninitialize COM if this was the last connection
                 if not self.connections:
                     self._uninitialize_com()
                 
@@ -371,7 +304,6 @@ class AutoCADInterface:
             if self.disconnect(instance_id):
                 count += 1
         
-        # Ensure COM is uninitialized after disconnecting all
         if count > 0:
             self._uninitialize_com()
         
@@ -381,9 +313,16 @@ class AutoCADInterface:
         """List all active AutoCAD connections"""
         connections = []
         for instance_id, conn in self.connections.items():
-            connections.append({
+            info = {
                 "instance_id": instance_id,
                 "connected": self.is_connection_alive(conn),
-                "document_name": self.get_active_document_info(instance_id).get("name", "Unknown")
-            })
+                "document_name": "Unknown"
+            }
+            if info["connected"]:
+                try:
+                    doc_info = self.get_active_document_info(instance_id)
+                    info["document_name"] = doc_info.get("name", "Unknown")
+                except Exception as e:
+                    self.logger.warning(f"Could not get doc info for {instance_id}: {e}")
+            connections.append(info)
         return connections
