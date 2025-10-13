@@ -35,7 +35,7 @@
   (set-current-layer "WALL-CENTER")
   (draw-line start-pt end-pt)
   
-  (display-message "Architectural wall created")
+  ;; (display-message "Architectural wall created")
 )
 
 ;; Function to create door opening with swing

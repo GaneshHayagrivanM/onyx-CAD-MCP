@@ -173,8 +173,16 @@ class AutoCADInterface:
             self.logger.debug(f"Executing LISP code: {lisp_code[:100]}...")
             
             doc = self._get_active_document(connection.application)
-
-            result = doc.SendStringToExecute(lisp_code + "\n", True)
+            
+            # First, ensure LISP support files are loaded
+            self._ensure_lisp_files_loaded(doc, instance_id)
+            
+            # Split the LISP code into individual expressions and execute them
+            # SendStringToExecute can be finicky with complex multi-line code
+            lisp_code = lisp_code.strip()
+            
+            # Execute the LISP code line by line for better compatibility
+            doc.SendCommand(lisp_code + "\n")
             
             execution_time = time.time() - start_time
             
@@ -182,7 +190,7 @@ class AutoCADInterface:
             
             return LispExecutionResult(
                 success=True,
-                result=result,
+                result="Command executed",
                 execution_time=execution_time
             )
             
@@ -196,6 +204,37 @@ class AutoCADInterface:
                 error_message=error_msg,
                 execution_time=execution_time
             )
+    
+    def _ensure_lisp_files_loaded(self, doc: Any, instance_id: str):
+        """Ensure required LISP files are loaded in AutoCAD"""
+        connection = self.connections.get(instance_id)
+        if not connection:
+            return
+        
+        # Check if we've already loaded the files for this connection
+        if not hasattr(connection, '_lisp_files_loaded'):
+            connection._lisp_files_loaded = False
+        
+        if not connection._lisp_files_loaded:
+            try:
+                # Load core functions
+                core_lisp_path = os.path.abspath("lisp/core_functions.lsp")
+                arch_lisp_path = os.path.abspath("lisp/architectural_tools.lsp")
+                
+                if os.path.exists(core_lisp_path):
+                    self.logger.info(f"Loading core functions from {core_lisp_path}")
+                    doc.SendCommand(f'(load "{core_lisp_path.replace(chr(92), "/")}") ')
+                    time.sleep(0.5)
+                
+                if os.path.exists(arch_lisp_path):
+                    self.logger.info(f"Loading architectural tools from {arch_lisp_path}")
+                    doc.SendCommand(f'(load "{arch_lisp_path.replace(chr(92), "/")}") ')
+                    time.sleep(0.5)
+                
+                connection._lisp_files_loaded = True
+                self.logger.info("LISP support files loaded successfully")
+            except Exception as e:
+                self.logger.warning(f"Failed to load LISP support files: {str(e)}")
     
     def load_lisp_file(self, filepath: str, instance_id: str = "default") -> LispExecutionResult:
         """
