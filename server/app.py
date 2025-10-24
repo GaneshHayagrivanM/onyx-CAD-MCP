@@ -12,7 +12,8 @@ from typing import Dict, Any, List
 from config.settings import get_config
 from server.autocad_interface import AutoCADInterface
 from server.lisp_generator import LispGenerator
-from server.models import Point, Wall, Door, Window, Room, Layer, SwingDirection, FurnitureType
+from server.models import (Point, Wall, Door, Window, Room, Layer, SwingDirection,
+                           FurnitureType, DoorType, WindowType, GlassType)
 from server.utils import (
     setup_logging, validate_point, validate_positive_number, 
     calculate_area_from_points, ValidationError, AutoCADConnectionError
@@ -168,7 +169,7 @@ def create_wall():
 
 @app.route('/api/drawing/door', methods=['POST'])
 def insert_door():
-    """Insert a door"""
+    """Insert a door with automatic annotation"""
     try:
         data = request.get_json()
         validate_request_data(data, ['wall_reference', 'position', 'width', 'height', 'swing_direction'])
@@ -178,6 +179,9 @@ def insert_door():
         width = float(data['width'])
         height = float(data['height'])
         swing_direction = SwingDirection(data['swing_direction'])
+        door_type = DoorType(data.get('door_type', 'SINGLE'))
+        wall_thickness = float(data.get('wall_thickness', 100.0))
+        ref_id = data.get('ref_id')
         instance_id = data.get('instance_id', 'default')
         
         # Validation
@@ -185,12 +189,15 @@ def insert_door():
             raise ValidationError(f"Door width must be at least {config.MIN_DOOR_WIDTH} inches")
         
         # Generate LISP code and execute
-        lisp_code = lisp_generator.insert_door(wall_reference, position, width, height, swing_direction)
+        lisp_code = lisp_generator.insert_door(wall_reference, position, width, height,
+                                               swing_direction, door_type, wall_thickness, ref_id)
         result = autocad_interface.execute_lisp(lisp_code, instance_id)
         
         return jsonify({
             "success": result.success,
-            "message": "Door inserted successfully" if result.success else result.error_message,
+            "message": "Door inserted successfully with annotation" if result.success else result.error_message,
+            "door_type": door_type.value,
+            "ref_id": ref_id if ref_id else "auto-generated",
             "execution_time": result.execution_time
         })
         
@@ -200,7 +207,7 @@ def insert_door():
 
 @app.route('/api/drawing/window', methods=['POST'])
 def insert_window():
-    """Insert a window"""
+    """Insert a window with automatic annotation"""
     try:
         data = request.get_json()
         validate_request_data(data, ['wall_reference', 'position', 'width', 'height', 'sill_height'])
@@ -210,6 +217,9 @@ def insert_window():
         width = float(data['width'])
         height = float(data['height'])
         sill_height = float(data['sill_height'])
+        window_type = WindowType(data.get('window_type', 'FIXED'))
+        glass_type = GlassType(data.get('glass_type', 'DOUBLE'))
+        ref_id = data.get('ref_id')
         instance_id = data.get('instance_id', 'default')
         
         # Validation
@@ -217,17 +227,88 @@ def insert_window():
             raise ValidationError(f"Window width must be at least {config.MIN_WINDOW_WIDTH} inches")
         
         # Generate LISP code and execute
-        lisp_code = lisp_generator.insert_window(wall_reference, position, width, height, sill_height)
+        lisp_code = lisp_generator.insert_window(wall_reference, position, width, height,
+                                                 sill_height, window_type, glass_type, ref_id)
         result = autocad_interface.execute_lisp(lisp_code, instance_id)
         
         return jsonify({
             "success": result.success,
-            "message": "Window inserted successfully" if result.success else result.error_message,
+            "message": "Window inserted successfully with annotation" if result.success else result.error_message,
+            "window_type": window_type.value,
+            "glass_type": glass_type.value,
+            "ref_id": ref_id if ref_id else "auto-generated",
             "execution_time": result.execution_time
         })
         
     except Exception as e:
         logger.error(f"Failed to insert window: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/drawing/door/simple', methods=['POST'])
+def insert_door_simple():
+    """Insert a door using simplified parameters"""
+    try:
+        data = request.get_json()
+        validate_request_data(data, ['position', 'width', 'height'])
+        
+        position = parse_point(data['position'])
+        width = float(data['width'])
+        height = float(data['height'])
+        door_type = DoorType(data.get('door_type', 'SINGLE'))
+        ref_id = data.get('ref_id')
+        instance_id = data.get('instance_id', 'default')
+        
+        # Validation
+        if width < config.MIN_DOOR_WIDTH:
+            raise ValidationError(f"Door width must be at least {config.MIN_DOOR_WIDTH} inches")
+        
+        # Generate LISP code and execute
+        lisp_code = lisp_generator.insert_door_simple(position, width, height, door_type, ref_id)
+        result = autocad_interface.execute_lisp(lisp_code, instance_id)
+        
+        return jsonify({
+            "success": result.success,
+            "message": f"{door_type.value} door inserted successfully" if result.success else result.error_message,
+            "door_type": door_type.value,
+            "execution_time": result.execution_time
+        })
+        
+    except Exception as e:
+        logger.error(f"Failed to insert simple door: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/drawing/window/simple', methods=['POST'])
+def insert_window_simple():
+    """Insert a window using simplified parameters"""
+    try:
+        data = request.get_json()
+        validate_request_data(data, ['position', 'width', 'height', 'sill_height'])
+        
+        position = parse_point(data['position'])
+        width = float(data['width'])
+        height = float(data['height'])
+        sill_height = float(data['sill_height'])
+        window_type = WindowType(data.get('window_type', 'FIXED'))
+        ref_id = data.get('ref_id')
+        instance_id = data.get('instance_id', 'default')
+        
+        # Validation
+        if width < config.MIN_WINDOW_WIDTH:
+            raise ValidationError(f"Window width must be at least {config.MIN_WINDOW_WIDTH} inches")
+        
+        # Generate LISP code and execute
+        lisp_code = lisp_generator.insert_window_simple(position, width, height, sill_height, window_type, ref_id)
+        result = autocad_interface.execute_lisp(lisp_code, instance_id)
+        
+        return jsonify({
+            "success": result.success,
+            "message": f"{window_type.value} window inserted successfully" if result.success else result.error_message,
+            "window_type": window_type.value,
+            "execution_time": result.execution_time
+        })
+        
+    except Exception as e:
+        logger.error(f"Failed to insert simple window: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 400
 
 @app.route('/api/drawing/room', methods=['POST'])

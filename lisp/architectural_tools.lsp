@@ -4,6 +4,9 @@
 ;; Load core functions first
 (load "core_functions.lsp")
 
+;; Load advanced entities with door and window annotation
+(load "advanced_entities.lsp")
+
 ;; Default architectural settings
 (setq *default-wall-thickness* 6.0)
 (setq *default-wall-height* 96.0)
@@ -327,3 +330,9 @@
 
 ;; Initialize architectural tools
 (display-message "Architectural tools loaded successfully")
+(princ "\nEnhanced door and window functions available:")
+(princ "\n  - c:create-door (full parameters)")
+(princ "\n  - c:create-window (full parameters)")
+(princ "\n  - c:create-door-single, c:create-door-double, c:create-door-sliding")
+(princ "\n  - c:create-window-fixed, c:create-window-casement, c:create-window-sliding")
+(princ)

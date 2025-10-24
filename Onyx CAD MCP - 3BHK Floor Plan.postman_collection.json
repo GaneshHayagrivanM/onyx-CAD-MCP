@@ -1,0 +1,1103 @@
+{
+	"info": {
+		"_postman_id": "bd00bcc4-e3bf-42f9-9124-6e54530a05fb",
+		"name": "Onyx CAD MCP - 3BHK Floor Plan",
+		"description": "A collection of API requests to generate a 3BHK floor plan using the Onyx CAD MCP server.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14120086",
+		"_collection_link": "https://onyx33-6295.postman.co/workspace/onyx-constructions~6cfe0e7d-8c45-4f75-afdb-6270324262ba/collection/14120086-bd00bcc4-e3bf-42f9-9124-6e54530a05fb?action=share&source=collection_link&creator=14120086"
+	},
+	"item": [
+		{
+			"name": "2. Setup Drawing Layers",
+			"item": [
+				{
+					"name": "Layer: EXTERIOR_WALLS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"EXTERIOR_WALLS\",\n    \"color\": 1,\n    \"line_type\": \"Continuous\",\n    \"line_weight\": 0.50,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/layout/layer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"layout",
+								"layer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Layer: INTERIOR_WALLS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"INTERIOR_WALLS\",\n    \"color\": 2,\n    \"line_type\": \"Continuous\",\n    \"line_weight\": 0.35,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/layout/layer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"layout",
+								"layer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Layer: DOORS, WINDOWS, FURNITURE, etc.",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"DOORS\", \"color\": 3, \"line_type\": \"Continuous\", \"line_weight\": 0.25, \"instance_id\": \"3bhk_project\" \n}\n\n{\n    \"name\": \"WINDOWS\", \"color\": 4, \"line_type\": \"Continuous\", \"line_weight\": 0.25, \"instance_id\": \"3bhk_project\"\n}\n\n{\n    \"name\": \"FURNITURE\", \"color\": 5, \"line_type\": \"Continuous\", \"line_weight\": 0.15, \"instance_id\": \"3bhk_project\"\n}\n\n{\n    \"name\": \"DIMENSIONS\", \"color\": 6, \"line_type\": \"Continuous\", \"line_weight\": 0.15, \"instance_id\": \"3bhk_project\"\n}\n\n{\n    \"name\": \"TEXT_LABELS\", \"color\": 7, \"line_type\": \"Continuous\", \"line_weight\": 0.20, \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/layout/layer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"layout",
+								"layer"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Create Exterior Walls",
+			"item": [
+				{
+					"name": "North Wall",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 0, \"y\": 0},\n    \"end_point\": {\"x\": 480, \"y\": 0},\n    \"thickness\": 9,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "East Wall",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 480, \"y\": 0},\n    \"end_point\": {\"x\": 480, \"y\": 720},\n    \"thickness\": 9,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "South Wall",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 480, \"y\": 720},\n    \"end_point\": {\"x\": 0, \"y\": 720},\n    \"thickness\": 9,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "West Wall",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 0, \"y\": 720},\n    \"end_point\": {\"x\": 0, \"y\": 0},\n    \"thickness\": 9,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Create Interior Walls",
+			"item": [
+				{
+					"name": "Living & Kitchen Separator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 0, \"y\": 240},\n    \"end_point\": {\"x\": 240, \"y\": 240},\n    \"thickness\": 4.5,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Living & Bedroom1 Separator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 240, \"y\": 0},\n    \"end_point\": {\"x\": 240, \"y\": 420},\n    \"thickness\": 4.5,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bedroom1 & Bath Separator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 240, \"y\": 120},\n    \"end_point\": {\"x\": 480, \"y\": 120},\n    \"thickness\": 4.5,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bed2 & Master Bed Separator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 0, \"y\": 420},\n    \"end_point\": {\"x\": 480, \"y\": 420},\n    \"thickness\": 4.5,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Master Bed & Bath Separator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 240, \"y\": 580},\n    \"end_point\": {\"x\": 480, \"y\": 580},\n    \"thickness\": 4.5,\n    \"height\": 120,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/wall",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"wall"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Insert Doors",
+			"item": [
+				{
+					"name": "Main Entrance Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_1\",\n    \"position\": {\"x\": 60, \"y\": 0},\n    \"width\": 42,\n    \"height\": 84,\n    \"swing_direction\": \"left_in\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Kitchen Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"int_wall_1\",\n    \"position\": {\"x\": 200, \"y\": 240},\n    \"width\": 36,\n    \"height\": 84,\n    \"swing_direction\": \"right_in\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bedroom 1 Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"int_wall_2\",\n    \"position\": {\"x\": 240, \"y\": 380},\n    \"width\": 36,\n    \"height\": 84,\n    \"swing_direction\": \"left_in\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bedroom 2 Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"int_wall_3\",\n    \"position\": {\"x\": 40, \"y\": 420},\n    \"width\": 36,\n    \"height\": 84,\n    \"swing_direction\": \"left_in\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Master Bedroom Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"int_wall_3\",\n    \"position\": {\"x\": 420, \"y\": 420},\n    \"width\": 36,\n    \"height\": 84,\n    \"swing_direction\": \"right_in\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Common Bathroom Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"int_wall_2\",\n    \"position\": {\"x\": 240, \"y\": 80},\n    \"width\": 32,\n    \"height\": 84,\n    \"swing_direction\": \"right_out\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Attached Bathroom Door",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"int_wall_4\",\n    \"position\": {\"x\": 280, \"y\": 580},\n    \"width\": 32,\n    \"height\": 84,\n    \"swing_direction\": \"left_in\",\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/door",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"door"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Insert Windows",
+			"item": [
+				{
+					"name": "Living Room Window",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_4\",\n    \"position\": {\"x\": 0, \"y\": 300},\n    \"width\": 96,\n    \"height\": 48,\n    \"sill_height\": 36,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/window",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"window"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Kitchen Window",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_4\",\n    \"position\": {\"x\": 0, \"y\": 80},\n    \"width\": 60,\n    \"height\": 40,\n    \"sill_height\": 42,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/window",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"window"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bedroom 1 Window",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_1\",\n    \"position\": {\"x\": 300, \"y\": 0},\n    \"width\": 72,\n    \"height\": 48,\n    \"sill_height\": 36,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/window",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"window"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bedroom 2 Window",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_3\",\n    \"position\": {\"x\": 60, \"y\": 720},\n    \"width\": 72,\n    \"height\": 48,\n    \"sill_height\": 36,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/window",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"window"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Master Bedroom Window",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_2\",\n    \"position\": {\"x\": 480, \"y\": 480},\n    \"width\": 84,\n    \"height\": 48,\n    \"sill_height\": 36,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/window",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"window"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bathroom Ventilators",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wall_reference\": \"ext_wall_2\",\n    \"position\": {\"x\": 480, \"y\": 40},\n    \"width\": 24,\n    \"height\": 24,\n    \"sill_height\": 60,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/drawing/window",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"drawing",
+								"window"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Add Room Labels",
+			"item": [
+				{
+					"name": "Living Room Label",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"insertion_point\": {\"x\": 120, \"y\": 320},\n    \"text_string\": \"LIVING ROOM\\n20ft x 20ft\",\n    \"height\": 8,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/annotation/text",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"annotation",
+								"text"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Kitchen Label",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"insertion_point\": {\"x\": 120, \"y\": 120},\n    \"text_string\": \"KITCHEN\\n20ft x 10ft\",\n    \"height\": 8,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/annotation/text",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"annotation",
+								"text"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bedroom 1 Label",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"insertion_point\": {\"x\": 350, \"y\": 250},\n    \"text_string\": \"BEDROOM 1\\n20ft x 15ft\",\n    \"height\": 8,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/annotation/text",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"annotation",
+								"text"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Insert Furniture",
+			"item": [
+				{
+					"name": "Living Room Sofa",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"insertion_point\": {\"x\": 20, \"y\": 260},\n    \"furniture_type\": \"sofa\",\n    \"rotation\": 90,\n    \"scale\": 1.2,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/furniture/insert",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"furniture",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Master Bedroom Bed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"insertion_point\": {\"x\": 260, \"y\": 440},\n    \"furniture_type\": \"bed\",\n    \"rotation\": 0,\n    \"scale\": 1.2,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/furniture/insert",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"furniture",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dining Table",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"insertion_point\": {\"x\": 350, \"y\": 320},\n    \"furniture_type\": \"table\",\n    \"rotation\": 0,\n    \"scale\": 1.0,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/furniture/insert",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"furniture",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "9. Add Dimensions",
+			"item": [
+				{
+					"name": "Overall Width",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": 0, \"y\": -30},\n    \"end_point\": {\"x\": 480, \"y\": -30},\n    \"offset_distance\": 0,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/annotation/dimension",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"annotation",
+								"dimension"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Overall Height",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_point\": {\"x\": -30, \"y\": 0},\n    \"end_point\": {\"x\": -30, \"y\": 720},\n    \"offset_distance\": 0,\n    \"instance_id\": \"3bhk_project\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/annotation/dimension",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"annotation",
+								"dimension"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "1. Connect to AutoCAD",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"instance_id\": \"3bhk_project\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/autocad/connect",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"autocad",
+						"connect"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10. Save the Drawing",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"filepath\": \"C:\\\\Users\\\\GaneshHayagrivanM\\\\Documents\\\\3BHK_Floor_Plan.dwg\",\n  \"instance_id\": \"3bhk_project\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/drawing/save",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"drawing",
+						"save"
+					]
+				},
+				"description": "NOTE: Update the 'filepath' to a valid path on your system before sending this request."
+			},
+			"response": []
+		}
+	]
+}
