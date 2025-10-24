@@ -36,6 +36,28 @@ class SwingDirection(Enum):
     RIGHT_IN = "right_in"
     RIGHT_OUT = "right_out"
 
+class DoorType(Enum):
+    """Door types"""
+    SINGLE = "SINGLE"
+    DOUBLE = "DOUBLE"
+    SLIDING = "SLIDING"
+    POCKET = "POCKET"
+
+class WindowType(Enum):
+    """Window types"""
+    FIXED = "FIXED"
+    CASEMENT = "CASEMENT"
+    SLIDING = "SLIDING"
+    DOUBLE_HUNG = "DOUBLE-HUNG"
+    AWNING = "AWNING"
+
+class GlassType(Enum):
+    """Glass types"""
+    SINGLE = "SINGLE"
+    DOUBLE = "DOUBLE"
+    TRIPLE = "TRIPLE"
+    TEMPERED = "TEMPERED"
+
 @dataclass
 class Door:
     """Represents a door element"""
@@ -44,6 +66,9 @@ class Door:
     width: float
     height: float
     swing_direction: SwingDirection
+    door_type: DoorType = DoorType.SINGLE
+    wall_thickness: float = 100.0
+    ref_id: str = None
     layer: str = "DOORS"
 
 @dataclass
@@ -54,6 +79,9 @@ class Window:
     width: float
     height: float
     sill_height: float
+    window_type: WindowType = WindowType.FIXED
+    glass_type: GlassType = GlassType.DOUBLE
+    ref_id: str = None
     layer: str = "WINDOWS"
 
 @dataclass

@@ -3,7 +3,8 @@ AutoLISP code generation for architectural functions
 """
 import logging
 from typing import List, Dict, Any, Optional
-from server.models import Point, Wall, Door, Window, Room, Layer, TextNote, Dimension, Furniture, FurnitureType, SwingDirection
+from server.models import (Point, Wall, Door, Window, Room, Layer, TextNote, Dimension,
+                           Furniture, FurnitureType, SwingDirection, DoorType, WindowType, GlassType)
 from server.utils import format_lisp_string, format_lisp_point, format_lisp_point_list, sanitize_layer_name
 
 logger = logging.getLogger(__name__)
@@ -18,58 +19,28 @@ class LispGenerator:
         """Generate AutoLISP code to create a wall"""
         return f"""(create-architectural-wall {format_lisp_point(start_point)} {format_lisp_point(end_point)} {thickness} {height})"""
 
-    def insert_door(self, wall_reference: str, position: Point, width: float, height: float, swing_direction: SwingDirection) -> str:
-        """Generate AutoLISP code to insert a door"""
+    def insert_door(self, wall_reference: str, position: Point, width: float, height: float,
+                    swing_direction: SwingDirection, door_type: DoorType = DoorType.SINGLE,
+                    wall_thickness: float = 100.0, ref_id: str = None) -> str:
+        """Generate AutoLISP code to insert a door with automatic annotation"""
         swing_angle = {
             SwingDirection.LEFT_IN: 0,
             SwingDirection.LEFT_OUT: 180,
             SwingDirection.RIGHT_IN: 90,
             SwingDirection.RIGHT_OUT: 270
-        }.get(swing_direction, 0)
+        }.get(swing_direction, 90)
         
-        return f"""
-(defun insert-door (pos width height swing-angle)
-  (setq pos {format_lisp_point(position)})
-  (setq width {width})
-  (setq height {height})
-  (setq swing-angle {swing_angle})
-  
-  ; Create door opening rectangle
-  (command "._RECTANGLE" pos (list (+ (car pos) width) (+ (cadr pos) height)))
-  
-  ; Create door swing arc
-  (command "._ARC" pos (list (+ (car pos) width) (cadr pos)) 
-           (polar pos (/ (* swing-angle pi) 180) width))
-  
-  (princ "Door inserted successfully")
-)
-(insert-door {format_lisp_point(position)} {width} {height} {swing_angle})
-"""
+        ref_id_param = f'"{ref_id}"' if ref_id else 'nil'
+        
+        return f"""(c:create-door {position.x} {position.y} {width} {height} {wall_thickness} {swing_angle} "{door_type.value}" {ref_id_param})"""
 
-    def insert_window(self, wall_reference: str, position: Point, width: float, height: float, sill_height: float) -> str:
-        """Generate AutoLISP code to insert a window"""
-        return f"""
-(defun insert-window (pos width height sill-height)
-  (setq pos {format_lisp_point(position)})
-  (setq width {width})
-  (setq height {height})
-  (setq sill-height {sill_height})
-  
-  ; Calculate window position with sill height
-  (setq win-bottom (list (car pos) (+ (cadr pos) sill-height)))
-  (setq win-top (list (+ (car pos) width) (+ (cadr pos) sill-height height)))
-  
-  ; Create window rectangle
-  (command "._RECTANGLE" win-bottom win-top)
-  
-  ; Add window lines for representation
-  (command "._LINE" win-bottom (list (+ (car pos) width) (+ (cadr pos) sill-height)) "")
-  (command "._LINE" (list (car pos) (+ (cadr pos) sill-height height)) win-top "")
-  
-  (princ "Window inserted successfully")
-)
-(insert-window {format_lisp_point(position)} {width} {height} {sill_height})
-"""
+    def insert_window(self, wall_reference: str, position: Point, width: float, height: float,
+                     sill_height: float, window_type: WindowType = WindowType.FIXED,
+                     glass_type: GlassType = GlassType.DOUBLE, ref_id: str = None) -> str:
+        """Generate AutoLISP code to insert a window with automatic annotation"""
+        ref_id_param = f'"{ref_id}"' if ref_id else 'nil'
+        
+        return f"""(c:create-window {position.x} {position.y} {width} {height} {sill_height} "{window_type.value}" "{glass_type.value}" {ref_id_param})"""
 
     def create_room(self, points: List[Point], height: float) -> str:
         """Generate AutoLISP code to create a room"""
@@ -257,6 +228,35 @@ class LispGenerator:
 )
 (save-drawing {format_lisp_string(filepath)})
 """
+
+    def insert_door_simple(self, position: Point, width: float, height: float,
+                          door_type: DoorType = DoorType.SINGLE, ref_id: str = None) -> str:
+        """Generate AutoLISP code for simplified door insertion"""
+        ref_id_param = f'"{ref_id}"' if ref_id else 'nil'
+        
+        type_func_map = {
+            DoorType.SINGLE: "c:create-door-single",
+            DoorType.DOUBLE: "c:create-door-double",
+            DoorType.SLIDING: "c:create-door-sliding"
+        }
+        
+        func_name = type_func_map.get(door_type, "c:create-door-single")
+        return f"""({func_name} {position.x} {position.y} {width} {height} {ref_id_param})"""
+    
+    def insert_window_simple(self, position: Point, width: float, height: float,
+                           sill_height: float, window_type: WindowType = WindowType.FIXED,
+                           ref_id: str = None) -> str:
+        """Generate AutoLISP code for simplified window insertion"""
+        ref_id_param = f'"{ref_id}"' if ref_id else 'nil'
+        
+        type_func_map = {
+            WindowType.FIXED: "c:create-window-fixed",
+            WindowType.CASEMENT: "c:create-window-casement",
+            WindowType.SLIDING: "c:create-window-sliding"
+        }
+        
+        func_name = type_func_map.get(window_type, "c:create-window-fixed")
+        return f"""({func_name} {position.x} {position.y} {width} {height} {sill_height} {ref_id_param})"""
 
     def execute_lisp(self, lisp_code: str) -> str:
         """Prepare AutoLISP code for execution"""
