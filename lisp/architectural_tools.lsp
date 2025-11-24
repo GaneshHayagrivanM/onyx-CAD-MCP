@@ -29,9 +29,10 @@
   (setq p4 (polar start-pt (- perp-angle pi) (/ thickness 2)))
   
   ;; Create wall as closed polyline
-  (ensure-layer "WALLS" 1 "Continuous" 0.35)
+  (ensure-layer "WALLS" 1 "Continuous" 0.50)
   (set-current-layer "WALLS")
   (draw-polyline (list p1 p2 p3 p4) T)
+  (command "._-HATCH" "P" "SOLID" "S" "L" "" "")
   
   ;; Add centerline
   (ensure-layer "WALL-CENTER" 8 "CENTER" 0.15)
@@ -44,14 +45,25 @@
 ;; Function to create door opening with swing
 (defun create-door-opening (wall-start wall-end position width height swing-dir
                             / door-angle door-start door-end
-                              hinge-pt open-door-pt start-angle end-angle)
+                              hinge-pt open-door-pt start-angle end-angle
+                              perp-angle p1 p2 p3 p4)
   "Create door opening with swing indication"
   (setq door-angle (angle wall-start wall-end))
   (setq door-start position)
   (setq door-end (polar position door-angle width))
   
-  (ensure-layer "DOORS" 3 "Continuous" 0.25)
+  (ensure-layer "DOORS" 3 "Continuous" 0.20)
   (set-current-layer "DOORS")
+
+  ;; Create wipeout for door opening
+  (setq perp-angle (+ door-angle (/ pi 2)))
+  (setq p1 (polar door-start perp-angle (/ *default-wall-thickness* 2)))
+  (setq p2 (polar door-end perp-angle (/ *default-wall-thickness* 2)))
+  (setq p3 (polar door-end perp-angle (- 0 (/ *default-wall-thickness* 2))))
+  (setq p4 (polar door-start perp-angle (- 0 (/ *default-wall-thickness* 2))))
+
+  (setvar "WIPEOUTFRAME" 0)
+  (command "._WIPEOUT" p1 p2 p3 p4 "")
   
   ;; Determine hinge point and swing angles
   (cond
@@ -92,7 +104,7 @@
   (setq win-start position)
   (setq win-end (polar position win-angle width))
   
-  (ensure-layer "WINDOWS" 4 "Continuous" 0.25)
+  (ensure-layer "WINDOWS" 4 "Continuous" 0.20)
   (set-current-layer "WINDOWS")
   
   ;; Calculate window frame corners based on wall thickness
@@ -102,10 +114,15 @@
   (setq p3 (polar win-end perp-angle (- 0 (/ *default-wall-thickness* 2))))
   (setq p4 (polar win-start perp-angle (- 0 (/ *default-wall-thickness* 2))))
   
-  ;; Draw window frame
-  (draw-polyline (list p1 p2 p3 p4) T)
+  ;; Create wipeout for window opening
+  (setvar "WIPEOUTFRAME" 0)
+  (command "._WIPEOUT" p1 p2 p3 p4 "")
+
+  ;; Draw wall caps (lines closing the wall gap)
+  (draw-line p1 p4)
+  (draw-line p2 p3)
   
-  ;; Draw centerline for glass
+  ;; Draw simple centerline for glass
   (setq mid1 (list (/ (+ (car p1) (car p4)) 2) (/ (+ (cadr p1) (cadr p4)) 2)))
   (setq mid2 (list (/ (+ (car p2) (car p3)) 2) (/ (+ (cadr p2) (cadr p3)) 2)))
   (draw-line mid1 mid2)
@@ -156,7 +173,7 @@
 ;; Function to create furniture block
 (defun create-furniture-block (pos furniture-type rotation scale / block-name)
   "Insert furniture block at specified position"
-  (ensure-layer "FURNITURE" 5 "Continuous" 0.20)
+  (ensure-layer "FURNITURE" 5 "Continuous" 0.15)
   (set-current-layer "FURNITURE")
   
   ;; Define furniture block names

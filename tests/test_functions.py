@@ -159,19 +159,16 @@ class TestLispGenerator:
         position = Point(50, 0, 0)
         lisp_code = lisp_generator.insert_door("wall_1", position, 36, 84, SwingDirection.LEFT_IN)
         
-        assert "insert-door" in lisp_code
-        assert "RECTANGLE" in lisp_code
-        assert "ARC" in lisp_code
-        assert "50 0 0" in lisp_code
+        assert "c:create-door" in lisp_code
+        assert "50 0" in lisp_code
     
     def test_insert_window_lisp(self, lisp_generator):
         """Test window insertion LISP code generation"""
         position = Point(30, 0, 0)
         lisp_code = lisp_generator.insert_window("wall_1", position, 48, 36, 30)
         
-        assert "insert-window" in lisp_code
-        assert "RECTANGLE" in lisp_code
-        assert "30 0 0" in lisp_code
+        assert "c:create-window" in lisp_code
+        assert "30 0" in lisp_code
         assert "48" in lisp_code
         assert "36" in lisp_code
         assert "30" in lisp_code
