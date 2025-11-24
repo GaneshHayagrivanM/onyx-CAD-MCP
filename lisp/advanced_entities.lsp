@@ -129,7 +129,8 @@
 ;; swing-angle: 0, 90, 180, 270 (degrees, direction of swing)
 (defun c:create-door (x y width height wall-thickness swing-angle door-type ref-id / 
                       base-pt door-layer anno-layer swing-radius p1 p2 p3 p4
-                      arc-start arc-end mid-pt anno-pt anno-text)
+                      arc-start arc-end mid-pt anno-pt anno-text
+                      wp1 wp2 wp3 wp4)
   ;; Ensure layers exist
   (ensure-annotation-layers)
   (setq door-layer "A-DOOR")
@@ -142,6 +143,18 @@
   (setq base-pt (list x y 0.0))
   (setq swing-radius width)
   
+  ;; Create wipeout for door opening if wall thickness is available
+  (if wall-thickness
+     (progn
+       (setq wp1 (list x (- y (/ wall-thickness 2.0)) 0.0))
+       (setq wp2 (list (+ x width) (- y (/ wall-thickness 2.0)) 0.0))
+       (setq wp3 (list (+ x width) (+ y (/ wall-thickness 2.0)) 0.0))
+       (setq wp4 (list x (+ y (/ wall-thickness 2.0)) 0.0))
+       (setvar "WIPEOUTFRAME" 0)
+       (command "._WIPEOUT" wp1 wp2 wp3 wp4 "")
+     )
+  )
+
   ;; Generate reference ID if not provided
   (if (not ref-id)
     (setq ref-id (generate-ref-id "D"))
