@@ -81,6 +81,7 @@ class AutoCADInterface:
         try:
             doc = app.ActiveDocument
             self.logger.debug(f"Using active document: {doc.Name}")
+            time.sleep(0.5)
         except Exception:
             self.logger.info("No active document, creating new drawing.")
             doc = app.Documents.Add()
